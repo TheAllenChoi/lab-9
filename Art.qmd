@@ -3,7 +3,7 @@ title: "Lab 9: Generative Art"
 author: "Allen Choi"
 format:
   html:
-    code-fold: show
+    code-fold: true
     code-summary: "Click to hide/show the code"
     code-overflow: wrap
     toc: true
@@ -23,9 +23,40 @@ library(ambient)
 library(tictoc)
 ```
 
-# Penguins
+# The Sun
 ```{r}
-penguins
+set.seed(541)
+attitude_2 <- attitude |> 
+  rbind(attitude |> 
+          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 1))))
+  ) |> 
+  rbind(attitude |> 
+          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 0.1))))
+  ) |> 
+  rbind(attitude |> 
+          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 0.01))))
+  )
+
+attitude_2 <- attitude_2 |> 
+  rbind(attitude_2 |> 
+          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, .1))))
+  ) |> 
+   mutate(across(everything(), ~ (.x * -1)))
+
+attitude_2 |> 
+  ggplot(aes(x = rating, 
+             xend = raises,
+             yend = advance,
+             y = complaints,
+             color = privileges,
+             linewidth = critical)) +
+  geom_segment(show.legend = FALSE) +
+  coord_polar() +
+  scale_color_gradientn(colours = c("red", "orange", "yellow")) +
+  theme_void() +
+  theme(panel.background = element_rect(fill = "black"),
+        plot.background = element_rect(fill = "black"))
+
 ```
 
 # Disease
@@ -38,7 +69,7 @@ sample_canva2 <- function(seed = NULL, n = 4) {
     (\(x) colorRampPalette(x)(n))()  
 }
 
-transform_to_curl_space <- function(x, y, frequency = 5, octaves = 10) {
+transform_to_curl_space <- function(x, y, frequency = 6, octaves = 10) {
   curl_noise(
     generator = fracture,
     noise = gen_simplex,
@@ -65,7 +96,7 @@ define_worley_cells <- function(x, y, frequency = 2, octaves = 6) {
     normalise()
 }
 
-simplex_noise <- function(x, y, frequency = .1, octaves = 10) {
+simplex_noise <- function(x, y, frequency = .085, octaves = 10) {
   fracture(
     noise = gen_simplex,
     fractal = ridged,
@@ -104,12 +135,12 @@ shaded_ice_floe <- function(seed) {
   
   height_shade(
     heightmap = art,
-    texture = sample_canva2(seed, 50)
+    texture = sample_canva2(seed, 4)
   ) |>
     add_shadow(
       shadowmap = ray_shade(
         heightmap = art, 
-        sunaltitude = 45, 
+        sunaltitude = 60, 
         sunangle = 135,
         multicore = TRUE, 
         zscale = .005
@@ -123,4 +154,12 @@ shaded_ice_floe(12345)
 ```
 Changed the frequency and octaves which changed the size of the "cell walls"
 Sun Angle I chose as 135 for the light to come from the bottom right
-Sun altitude maybe 40 for the light to come at an angle
+Sun altitude maybe 75 for the light to come at an angle since there were too many "mountains" in the way
+
+Made the transform to curl space have a high frequency to generate more "cells"
+
+Made the worley noise to 2 since it seemed to generate the area within the cells, and I chose a good middle ground between too much "noise" within each cell and not too much noise.
+
+Limited the number of colors to 4 in order to make it more minimalistic.
+
+The simplex noise seems to affect the height, so I wanted something with more valleys by making the frequency lower.
