@@ -4,12 +4,14 @@ author: "Allen Choi"
 format:
   html:
     code-fold: true
-    code-summary: "Click to hide/show the code"
+    code-summary: "Show / Hide"
     code-overflow: wrap
     toc: true
 embed-resources: true
 editor: source
 ---
+
+# Required Libraries
 
 ```{r}
 #| warning: false
@@ -24,25 +26,31 @@ library(tictoc)
 ```
 
 # The Sun
+
 ```{r}
+# set seed for consistency across sessions
 set.seed(541)
+
+# additional random changes across all variables in dataframe
 attitude_2 <- attitude |> 
   rbind(attitude |> 
-          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 1))))
-  ) |> 
+          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 1))))) |> 
   rbind(attitude |> 
-          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 0.1))))
-  ) |> 
+          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 0.1))))) |> 
   rbind(attitude |> 
-          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 0.01))))
-  )
+          mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, 0.01)))))
 
+
+# standardization and more random changes to make lines more random
 attitude_2 <- attitude_2 |> 
   rbind(attitude_2 |> 
           mutate(across(everything(), ~ (.x * rnorm(nrow(attitude), 0, .1))))
   ) |> 
-   mutate(across(everything(), ~ (.x * -1)))
+  mutate(across(everything(), ~ (.x * -1))) |> # rotate
+  mutate(across(everything(), ~ (.x - max(.x)))) # standardize
 
+
+# creation of the artwork
 attitude_2 |> 
   ggplot(aes(x = rating, 
              xend = raises,
@@ -59,7 +67,16 @@ attitude_2 |>
 
 ```
 
+## Museum Description
+
+The sun has always been a part of humanity's history, and its no wonder why we find sunsets so soothing to the soul. Thus, this art piece is meant to replicate the feeling of a peaceful end to the day, and the wonder of the beginning of the night.
+
+## Code Choices
+
+The extra rows created from rbind are meant to create "layers" on the sun, and the multiplication by -1 is meant to rotate the image to make it more presentable. The standardization is meant to condense all of the lines together so that it forms a more cohesive image.
+
 # Disease
+
 ```{r}
 ## The code is from https://art-from-code.netlify.app/day-1/session-4/
 sample_canva2 <- function(seed = NULL, n = 4) {
@@ -152,14 +169,16 @@ shaded_ice_floe <- function(seed) {
 
 shaded_ice_floe(12345)
 ```
-Changed the frequency and octaves which changed the size of the "cell walls"
-Sun Angle I chose as 135 for the light to come from the bottom right
-Sun altitude maybe 75 for the light to come at an angle since there were too many "mountains" in the way
 
-Made the transform to curl space have a high frequency to generate more "cells"
+## Museum Description
 
-Made the worley noise to 2 since it seemed to generate the area within the cells, and I chose a good middle ground between too much "noise" within each cell and not too much noise.
+The sickly spread of the disease from the left-hand corner infiltrates the healthy cells, spreading chaos and despair among the cells still remaining. The cancer is almost moving in a insidious manner, spreading its tendrils to capture the rest of the cells.
 
-Limited the number of colors to 4 in order to make it more minimalistic.
+## Code Choices
 
-The simplex noise seems to affect the height, so I wanted something with more valleys by making the frequency lower.
+-   Changed the frequency and octaves which changed the size of the "cell walls"
+-   The sun angle I chose as 135 for the light to come from the bottom right Sun altitude maybe 60 for the light to come at an angle since there were too many "mountains" in the way
+-   Made the transform to curl space have a high frequency to generate more "cells"
+-   Made the worley noise to 2 since it seemed to generate the area within the cells, and I chose a good middle ground between too much "noise" within each cell and not too much noise.
+-   Limited the number of colors to 4 in order to make it more minimalistic.
+-   The simplex noise seems to affect the height, so I wanted something with more valleys by making the frequency lower to 0.085.
